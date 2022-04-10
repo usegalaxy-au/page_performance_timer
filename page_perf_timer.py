@@ -33,6 +33,13 @@ class NoImplicitWait(object):
         self.driver.implicitly_wait(self.original_wait)
 
 
+class EndStepReached(Exception):
+    """
+    Raised when a specific action step has been reached
+    """
+    pass
+
+
 def clock_action(action_name):
     """
     Decorator to measure time taken to perform
@@ -49,6 +56,8 @@ def clock_action(action_name):
             retval = func(*args, **kwargs)
             elapsed = time.time() - start
             obj.timings[action_name] = elapsed
+            if obj.end_step == action_name:
+                raise EndStepReached(action_name)
             return retval
 
         return wrapper
@@ -58,10 +67,11 @@ def clock_action(action_name):
 
 class PagePerfTimer(object):
 
-    def __init__(self, server, username, password):
+    def __init__(self, server, username, password, end_step=None):
         self.server = server
         self.username = username
         self.password = password
+        self.end_step = end_step
         self.timings = {}
 
         """Start web driver"""
@@ -152,7 +162,10 @@ class PagePerfTimer(object):
     def measure_timings(self):
         self.timings = {}
         try:
-            self.run_test_sequence()
+            try:
+                self.run_test_sequence()
+            except EndStepReached:
+                pass
         finally:
             self.driver.quit()
 
@@ -174,6 +187,8 @@ def create_parser():
                         help="Galaxy username to use (or set GALAXY_USERNAME env var)")
     parser.add_argument('-p', '--password', **from_env_or_required('GALAXY_PASSWORD'),
                         help="Password to use (or set GALAXY_PASSWORD env var)")
+    parser.add_argument('--end_step', default="tool_form_load",
+                        help="Stop performance timer at a specific step")
     return parser
 
 
@@ -181,7 +196,7 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    perf_timer = PagePerfTimer(args.server, args.username, args.password)
+    perf_timer = PagePerfTimer(args.server, args.username, args.password, args.end_step)
     perf_timer.measure_timings()
     perf_timer.print_timings()
     return 0
