@@ -1,5 +1,5 @@
 # https://github.com/joyzoursky/docker-python-chromedriver
-FROM joyzoursky/python-chromedriver:3.8
+FROM joyzoursky/python-chromedriver:3.9
 
 ENV SELENIUM_HEADLESS=true
 
