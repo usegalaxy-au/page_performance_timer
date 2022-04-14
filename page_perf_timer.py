@@ -56,7 +56,11 @@ def clock_action(action_name):
             start = time.time()
             retval = func(*args, **kwargs)
             elapsed = time.time() - start
-            obj.timings[action_name] = elapsed
+            obj.timings[action_name] = {
+                'elapsed': elapsed,
+                # unix time
+                'timestamp': time.time_ns()
+            }
             if obj.end_step == action_name:
                 raise EndStepReached(action_name)
             return retval
@@ -255,8 +259,8 @@ class PagePerfTimer(object):
             self.driver.quit()
 
     def print_timings(self):
-        for action, time_taken in self.timings.items():
-          print(f"user_flow_performance,server={self.server},action={action},run_id={self.run_id},end_step={self.end_step},workflow_name={self.workflow_name} time_taken={time_taken}")
+        for action, data in self.timings.items():
+          print(f"user_flow_performance,server={self.server},action={action},run_id={self.run_id},end_step={self.end_step},workflow_name={self.workflow_name} time_taken={data.get('elapsed')} {data.get('timestamp')}")
 
 
 def from_env_or_required(key):
