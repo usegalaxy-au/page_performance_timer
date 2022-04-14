@@ -14,11 +14,11 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 
 
-class NoImplicitWait(object):
+class SeleniumCustomWait(object):
     """
     Example usage:
 
-    with NoImplicitWait(driver, 0):
+    with SeleniumCustomWait(driver, 0):
         driver.find_element(By.ID, 'element-that-might-not-be-there')
     """
 
@@ -68,12 +68,13 @@ def clock_action(action_name):
 
 class PagePerfTimer(object):
 
-    def __init__(self, server, username, password, end_step=None, run_id=None):
+    def __init__(self, server, username, password, end_step=None, run_id=None, workflow_name=None):
         self.run_id = run_id or uuid.uuid4()
         self.server = server
         self.username = username
         self.password = password
         self.end_step = end_step
+        self.workflow_name = workflow_name
         self.timings = {}
 
         """Start web driver"""
@@ -87,14 +88,14 @@ class PagePerfTimer(object):
         self.wait = WebDriverWait(self.driver, 180)
 
     def find_login_button(self):
-        with NoImplicitWait(self.driver, 0):
+        with SeleniumCustomWait(self.driver, 0):
             try:
                 return self.driver.find_element(By.NAME, "login")
             except NoSuchElementException:
                 return None
 
     def find_sign_in_with_email(self):
-        with NoImplicitWait(self.driver, 0):
+        with SeleniumCustomWait(self.driver, 0):
             try:
                 return self.driver.find_element(By.XPATH, "//a[contains(., 'Sign in with email')]")
             except NoSuchElementException:
@@ -155,11 +156,93 @@ class PagePerfTimer(object):
         # Wait for tool form to load and execute button to appear
         self.wait.until(expected_conditions.presence_of_element_located((By.ID, "execute")))
 
+    @clock_action("shared_histories_page_load")
+    def load_shared_histories(self):
+        # Request history page
+        self.driver.get(f"{self.server}/histories/list_shared")
+        # Wait for history page to load
+        self.wait.until(expected_conditions.presence_of_element_located(
+            (By.XPATH, "//h2[contains(., 'Histories shared with you by others')]")))
+
+    @clock_action("import_shared_history")
+    def import_shared_history(self):
+        # Select relevant history
+        import_history_btn = self.driver.find_element(
+            By.XPATH, f"//tbody[@id='grid-table-body']//button[contains(., '{self.workflow_name}_Input_data')]")
+        import_history_btn.click()
+
+        # Invoke copy history dialogue
+        copy_history_menu_item = self.driver.find_element(
+            By.XPATH, f"//div[@id='{import_history_btn.get_attribute('id')}-menu']//a[contains(., 'Copy')]")
+        copy_history_menu_item.click()
+        # Set new history name
+        history_name_box = self.driver.find_element(
+            By.ID, "copy-modal-title")
+        history_name_box.clear()
+        history_name_box.send_keys(f"{self.workflow_name}_Input_data_{self.run_id}")
+        self.driver.find_element(By.ID, "button-1").click()
+        # Wait for history panel to load with new history
+        self.wait.until(expected_conditions.presence_of_element_located(
+            (By.XPATH, f"//div[@id='current-history-panel']//div[contains(., '{self.workflow_name}_Input_data')]")))
+
+    @clock_action("workflow_list_page")
+    def load_workflow_list(self):
+        # Request workflows list page
+        self.driver.get(f"{self.server}/workflows/list")
+        # Wait for workflow page to load and import button to appear
+        self.wait.until(expected_conditions.presence_of_element_located((By.ID, "workflow-import")))
+
+    @clock_action("workflow_run_page")
+    def load_workflow_run_form(self):
+        # Select relevant workflow
+        run_workflow_btn = self.driver.find_element(
+            By.XPATH,
+            f"//table[@id='workflow-table']//tr[contains(., '{self.workflow_name}')]//button[@title='Run workflow']")
+        run_workflow_btn.click()
+        # Wait for workflow form to load and run button to appear
+        self.wait.until(expected_conditions.presence_of_element_located((By.ID, "run-workflow")))
+
+    @clock_action("run_workflow")
+    def run_workflow(self):
+        if self.workflow_name == "Selenium_test_1":
+            # Select relevant choice
+            input_1_select = self.driver.find_element(By.XPATH, "//div[@data-label='1']//a")
+            input_1_select.click()
+            # Select relevant choice
+            input_1_select = self.driver.find_element(By.XPATH, "//div[@id='select2-drop']//ul/li/div[contains(., 'Subsample of reads from human exome R1')]")
+            input_1_select.click()
+            workflow_wait = 1200
+        elif self.workflow_name == "Selenium_test_2":
+            workflow_wait = 600
+        elif self.workflow_name == "Selenium_test_3":
+            # Select relevant choice
+            input_1_select = self.driver.find_element(By.XPATH, "//div[@data-label='1']//a")
+            input_1_select.click()
+            # Select relevant choice
+            input_1_select = self.driver.find_element(By.XPATH, "//div[@id='select2-drop']//ul/li/div[contains(., 'ERR019289_1.fastq.gz')]")
+            input_1_select.click()
+            workflow_wait = 3600
+        elif self.workflow_name == "Selenium_test_4":
+            workflow_wait = 7200
+        else:
+            raise Exception(f"Workflow name not in known list: {self.workflow_name}")
+
+        # Run the workflow
+        self.driver.find_element(By.ID, "run-workflow").click()
+        # Wait for view reports button to appear (workflow to finish)
+        with SeleniumCustomWait(self.driver, workflow_wait):
+            self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, "//div[@id='center']//a[@class='invocation-report-link' and contains(., 'View Report')]")))
+
     def run_test_sequence(self):
         self.load_galaxy_login()
         self.login_to_galaxy_homepage()
         self.search_for_tool()
         self.load_tool_form()
+        self.load_shared_histories()
+        self.import_shared_history()
+        self.load_workflow_list()
+        self.load_workflow_run_form()
+        self.run_workflow()
 
     def measure_timings(self):
         self.timings = {}
@@ -173,7 +256,7 @@ class PagePerfTimer(object):
 
     def print_timings(self):
         for action, time_taken in self.timings.items():
-          print(f"user_flow_performance,server={self.server},action={action},run_id={self.run_id} time_taken={time_taken}")
+          print(f"user_flow_performance,server={self.server},action={action},run_id={self.run_id},end_step={self.end_step},workflow_name={self.workflow_name} time_taken={time_taken}")
 
 
 def from_env_or_required(key):
@@ -193,6 +276,8 @@ def create_parser():
                         help="Stop performance timer at a specific step")
     parser.add_argument('--run_id', default=None,
                         help="A unique id for this timing run. If not specified, a uuid is generated")
+    parser.add_argument('--workflow_name', default="Selenium_test_1",
+                        help="The name of the workflow to run. Must be Selenium_test_1 through 4")
     return parser
 
 
@@ -200,7 +285,7 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    perf_timer = PagePerfTimer(args.server, args.username, args.password, args.end_step, args.run_id)
+    perf_timer = PagePerfTimer(args.server, args.username, args.password, args.end_step, args.run_id, args.workflow_name)
     perf_timer.measure_timings()
     perf_timer.print_timings()
     return 0
