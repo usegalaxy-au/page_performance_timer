@@ -168,7 +168,7 @@ class PagePerfTimer(object):
     def import_shared_history(self):
         # Select relevant history
         import_history_btn = self.driver.find_element(
-            By.XPATH, f"//tbody[@id='grid-table-body']//button[contains(., '{self.workflow_name}_Input_data')]")
+            By.XPATH, f"//tbody[@id='grid-table-body']//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{self.workflow_name.lower()}_input_data')]")
         import_history_btn.click()
 
         # Invoke copy history dialogue
@@ -206,7 +206,7 @@ class PagePerfTimer(object):
     def run_workflow(self):
         if self.workflow_name == "Selenium_test_1":
             # Select relevant choice
-            input_1_select = self.driver.find_element(By.XPATH, "//div[@data-label='1']//a")
+            input_1_select = self.driver.find_element(By.XPATH, "//a[@class='select2-choice' and contains(., 'Subsample of reads from')]")
             input_1_select.click()
             # Select relevant choice
             input_1_select = self.driver.find_element(By.XPATH, "//div[@id='select2-drop']//ul/li/div[contains(., 'Subsample of reads from human exome R1')]")
@@ -216,7 +216,7 @@ class PagePerfTimer(object):
             workflow_wait = 600
         elif self.workflow_name == "Selenium_test_3":
             # Select relevant choice
-            input_1_select = self.driver.find_element(By.XPATH, "//div[@data-label='1']//a")
+            input_1_select = self.driver.find_element(By.XPATH, "//a[@class='select2-choice' and contains(., '.fastq.gz')]")
             input_1_select.click()
             # Select relevant choice
             input_1_select = self.driver.find_element(By.XPATH, "//div[@id='select2-drop']//ul/li/div[contains(., 'ERR019289_1.fastq.gz')]")
