@@ -215,19 +215,24 @@ class PagePerfTimer(object):
             # Select relevant choice
             input_1_select = self.driver.find_element(By.XPATH, "//div[@id='select2-drop']//ul/li/div[contains(., 'Subsample of reads from human exome R1')]")
             input_1_select.click()
-            workflow_wait = 1200
+            workflow_wait = 14400
         elif self.workflow_name == "Selenium_test_2":
-            workflow_wait = 600
+            workflow_wait = 14400
         elif self.workflow_name == "Selenium_test_3":
             # Select relevant choice
-            input_1_select = self.driver.find_element(By.XPATH, "//a[@class='select2-choice' and contains(., '.fastq.gz')]")
+            input_1_select = self.driver.find_element(By.XPATH, "//div[@step-label='Forward Reads']//a[@class='select2-choice']")
             input_1_select.click()
             # Select relevant choice
             input_1_select = self.driver.find_element(By.XPATH, "//div[@id='select2-drop']//ul/li/div[contains(., 'ERR019289_1.fastq.gz')]")
             input_1_select.click()
-            workflow_wait = 3600
+            workflow_wait = 14400
         elif self.workflow_name == "Selenium_test_4":
-            workflow_wait = 7200
+            input_select = self.driver.find_element(By.XPATH, "//div[@step-label='ARTIC primers to amplicon assignments']//a[@class='select2-choice']")
+            input_select.click()
+            # Select relevant choice
+            input_select = self.driver.find_element(By.XPATH, "//div[@id='select2-drop']//ul/li/div[contains(., 'ARTIC_SARS_CoV-2_amplicon_info_v3.tsv')]")
+            input_select.click()
+            workflow_wait = 14400
         else:
             raise Exception(f"Workflow name not in known list: {self.workflow_name}")
 
