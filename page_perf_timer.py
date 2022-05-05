@@ -227,6 +227,8 @@ class PagePerfTimer(object):
             input_1_select.click()
             workflow_wait = 3600
         elif self.workflow_name == "Selenium_test_4":
+            input_1_select = self.driver.find_element(By.XPATH, "//div[@id='select2-drop']//ul/li/div[contains(., 'ARTIC_SARS_CoV-2_amplicon_info_v3.tsv')]")
+            input_1_select.click()
             workflow_wait = 7200
         else:
             raise Exception(f"Workflow name not in known list: {self.workflow_name}")
