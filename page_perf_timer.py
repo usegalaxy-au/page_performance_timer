@@ -148,14 +148,14 @@ class PagePerfTimer(object):
         # Wait for BWA tool to appear
         self.wait.until(expected_conditions.presence_of_element_located(
             (By.XPATH,
-             "//a[@href='/tool_runner?tool_id=toolshed.g2.bx.psu.edu%2Frepos%2Fdevteam%2Fbwa%2Fbwa%2F0.7.17.4']")))
+             "//a[starts-with(@href, '/tool_runner?tool_id=toolshed.g2.bx.psu.edu%2Frepos%2Fdevteam%2Fbwa%2Fbwa%2F0.7')]")))
 
     @clock_action("tool_form_load")
     def load_tool_form(self):
         # Select BWA tool
         bwa_tool = self.driver.find_element(
             By.XPATH,
-            "//a[@href='/tool_runner?tool_id=toolshed.g2.bx.psu.edu%2Frepos%2Fdevteam%2Fbwa%2Fbwa%2F0.7.17.4']")
+            "//a[starts-with(@href,'/tool_runner?tool_id=toolshed.g2.bx.psu.edu%2Frepos%2Fdevteam%2Fbwa%2Fbwa%2F0.7')]")
         bwa_tool.click()
         # Wait for tool form to load and execute button to appear
         self.wait.until(expected_conditions.presence_of_element_located((By.ID, "execute")))
