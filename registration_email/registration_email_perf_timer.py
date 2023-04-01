@@ -141,8 +141,8 @@ class RegistrationEmailVerifier(object):
 
     @tenacity.retry(
         retry=tenacity.retry_if_result(lambda result: not result),
-        wait=tenacity.wait_fixed(5),
-        stop=tenacity.stop_after_attempt(3),
+        wait=tenacity.wait_fixed(int(os.environ.get("IMAP_POLL_SECONDS", 10))),
+        stop=tenacity.stop_after_attempt(int(os.environ.get("IMAP_MAX_POLL_ATTEMPTS", 12))),
         retry_error_callback=(lambda _: False),
     )
     def verify_email_received(self):
@@ -197,7 +197,6 @@ def create_parser():
         default=os.environ.get("GALAXY_SERVER") or "https://usegalaxy.org.au",
         help="Galaxy server url",
     )
-    # email=usegalaxyaustresstest@gmail.com
     parser.add_argument(
         "-e",
         "--email",

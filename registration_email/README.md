@@ -47,3 +47,7 @@ options:
   -a IMAP_PASSWORD, --imap_password IMAP_PASSWORD
                         IMAP password to use when checking for receipt of email (or set IMAP_PASSWORD env var)
 ```
+
+In addition, the environment variables IMAP_POLL_SECONDS can be used to control how many seconds to wait before checking the mail server
+for the arrival of the registration email. The IMAP_MAX_POLL_ATTEMPTS can be used to control how many times to try before giving up.
+Therefore, the total wait time for the registration email to arrive is IMAP_POLL_SECONDS*IMAP_MAX_POLL_ATTEMPTS.
