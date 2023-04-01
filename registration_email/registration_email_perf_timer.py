@@ -11,9 +11,9 @@ import tenacity
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.common.keys import Keys
 
 
 class SeleniumCustomWait(object):
@@ -37,8 +37,17 @@ class SeleniumCustomWait(object):
 
 
 class RegistrationEmailVerifier(object):
-
-    def __init__(self, server, username, password, email, imap_server, imap_port, imap_username, imap_password):
+    def __init__(
+        self,
+        server,
+        username,
+        password,
+        email,
+        imap_server,
+        imap_port,
+        imap_username,
+        imap_password,
+    ):
         self.run_id = uuid.uuid4()
         self.server = server
         self.username = username
@@ -52,10 +61,10 @@ class RegistrationEmailVerifier(object):
 
         """Start web driver"""
         chrome_options = webdriver.ChromeOptions()
-        if os.environ.get('SELENIUM_HEADLESS'):
-            chrome_options.add_argument('--no-sandbox')
-            chrome_options.add_argument('--headless')
-            chrome_options.add_argument('--disable-gpu')
+        if os.environ.get("SELENIUM_HEADLESS"):
+            chrome_options.add_argument("--no-sandbox")
+            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--disable-gpu")
         self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.implicitly_wait(180)
         self.wait = WebDriverWait(self.driver, 180)
@@ -70,7 +79,9 @@ class RegistrationEmailVerifier(object):
     def find_sign_in_with_email(self):
         with SeleniumCustomWait(self.driver, 0):
             try:
-                return self.driver.find_element(By.XPATH, "//a[contains(., 'Sign in with email')]")
+                return self.driver.find_element(
+                    By.XPATH, "//a[contains(., 'Sign in with email')]"
+                )
             except NoSuchElementException:
                 return None
 
@@ -102,8 +113,11 @@ class RegistrationEmailVerifier(object):
         # Submit login form
         self.driver.find_element(By.NAME, "password").send_keys(Keys.ENTER)
         # Wait for tool search box to appear
-        self.wait.until(expected_conditions.presence_of_element_located(
-            (By.XPATH, "//input[@placeholder='search tools']")))
+        self.wait.until(
+            expected_conditions.presence_of_element_located(
+                (By.XPATH, "//input[@placeholder='search tools']")
+            )
+        )
 
     def register_new_account_for_user(self, email, password, public_name):
         self.driver.find_element(By.NAME, "email").click()
@@ -115,17 +129,21 @@ class RegistrationEmailVerifier(object):
 
     def toggle_registration_page(self):
         self.driver.find_element(By.ID, "register-toggle").click()
-        self.wait.until(expected_conditions.presence_of_element_located((By.NAME, "email")))
+        self.wait.until(
+            expected_conditions.presence_of_element_located((By.NAME, "email"))
+        )
 
     def register_new_account(self):
         self.toggle_registration_page()
-        self.register_new_account_for_user(email=self.email, password=self.password, public_name=self.username)
+        self.register_new_account_for_user(
+            email=self.email, password=self.password, public_name=self.username
+        )
 
     @tenacity.retry(
         retry=tenacity.retry_if_result(lambda result: not result),
         wait=tenacity.wait_fixed(5),
         stop=tenacity.stop_after_attempt(3),
-        retry_error_callback=(lambda _: False)
+        retry_error_callback=(lambda _: False),
     )
     def verify_email_received(self):
         imap_server = imaplib.IMAP4_SSL(self.imap_server, self.imap_port)
@@ -133,7 +151,7 @@ class RegistrationEmailVerifier(object):
 
         try:
             # Select the inbox folder
-            imap_server.select('inbox')
+            imap_server.select("inbox")
 
             # Search for messages that match the specified criteria
             criteria = f'TO "{self.email}" SUBJECT "Galaxy Account Activation"'
@@ -156,36 +174,72 @@ class RegistrationEmailVerifier(object):
         self.timings = {}
         try:
             verified, elapsed = self.run_test_sequence()
-            result = 'success' if verified else 'failure'
-            print(f"email_verification,server={self.server},email={self.email},status={result} result={elapsed} {time.time_ns()}")
+            result = "success" if verified else "failure"
+            print(
+                f"email_verification,server={self.server},email={self.email},status={result} result={elapsed} {time.time_ns()}"
+            )
             print("")
         finally:
             self.driver.quit()
 
+
 def from_env_or_required(key):
-    return {'default': os.environ[key]} if os.environ.get(key) else {'required': True}
+    return {"default": os.environ[key]} if os.environ.get(key) else {"required": True}
 
 
 def create_parser():
     parser = argparse.ArgumentParser(
-        description='Register a user, and check whether a registration email is received.')
-    parser.add_argument('-s', '--server', default=os.environ.get('GALAXY_SERVER') or "https://usegalaxy.org.au",
-                        help="Galaxy server url")
+        description="Register a user, and check whether a registration email is received."
+    )
+    parser.add_argument(
+        "-s",
+        "--server",
+        default=os.environ.get("GALAXY_SERVER") or "https://usegalaxy.org.au",
+        help="Galaxy server url",
+    )
     # email=usegalaxyaustresstest@gmail.com
-    parser.add_argument('-e', '--email', **from_env_or_required('GALAXY_EMAIL'),
-                        help="Email address to use when registering the user (or set GALAXY_EMAIL env var)")
-    parser.add_argument('-u', '--username', **from_env_or_required('GALAXY_USERNAME'),
-                        help="Username to use when registering the user (or set GALAXY_USERNAME env var)")
-    parser.add_argument('-p', '--password', **from_env_or_required('GALAXY_PASSWORD'),
-                        help="Password to use when registering the user (or set GALAXY_PASSWORD env var)")
-    parser.add_argument('-i', '--imap_server', **from_env_or_required('IMAP_SERVER'),
-                        help="IMAP server to use when checking for receipt of email (or set IMAP_SERVER env var)")
-    parser.add_argument('-o', '--imap_port', **from_env_or_required('IMAP_PORT'),
-                        help="IMAP port to use when checking for receipt of email (or set IMAP_PORT env var)")
-    parser.add_argument('-m', '--imap_username', **from_env_or_required('IMAP_USERNAME'),
-                        help="IMAP username to use when checking for receipt of email (or set IMAP_USERNAME env var)")
-    parser.add_argument('-a', '--imap_password', **from_env_or_required('IMAP_PASSWORD'),
-                        help="IMAP password to use when checking for receipt of email (or set IMAP_PASSWORD env var)")
+    parser.add_argument(
+        "-e",
+        "--email",
+        **from_env_or_required("GALAXY_EMAIL"),
+        help="Email address to use when registering the user (or set GALAXY_EMAIL env var)",
+    )
+    parser.add_argument(
+        "-u",
+        "--username",
+        **from_env_or_required("GALAXY_USERNAME"),
+        help="Username to use when registering the user (or set GALAXY_USERNAME env var)",
+    )
+    parser.add_argument(
+        "-p",
+        "--password",
+        **from_env_or_required("GALAXY_PASSWORD"),
+        help="Password to use when registering the user (or set GALAXY_PASSWORD env var)",
+    )
+    parser.add_argument(
+        "-i",
+        "--imap_server",
+        **from_env_or_required("IMAP_SERVER"),
+        help="IMAP server to use when checking for receipt of email (or set IMAP_SERVER env var)",
+    )
+    parser.add_argument(
+        "-o",
+        "--imap_port",
+        **from_env_or_required("IMAP_PORT"),
+        help="IMAP port to use when checking for receipt of email (or set IMAP_PORT env var)",
+    )
+    parser.add_argument(
+        "-m",
+        "--imap_username",
+        **from_env_or_required("IMAP_USERNAME"),
+        help="IMAP username to use when checking for receipt of email (or set IMAP_USERNAME env var)",
+    )
+    parser.add_argument(
+        "-a",
+        "--imap_password",
+        **from_env_or_required("IMAP_PASSWORD"),
+        help="IMAP password to use when checking for receipt of email (or set IMAP_PASSWORD env var)",
+    )
     return parser
 
 
@@ -193,10 +247,19 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    reg_email_verifier = RegistrationEmailVerifier(args.server, args.username, args.password, args.email, args.imap_server, args.imap_port, args.imap_username, args.imap_password)
+    reg_email_verifier = RegistrationEmailVerifier(
+        args.server,
+        args.username,
+        args.password,
+        args.email,
+        args.imap_server,
+        args.imap_port,
+        args.imap_username,
+        args.imap_password,
+    )
     reg_email_verifier.time_registration_email()
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())
