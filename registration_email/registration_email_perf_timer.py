@@ -147,6 +147,7 @@ class RegistrationEmailVerifier(object):
         gi = galaxy.GalaxyInstance(url=self.server, key=self.api_key)
         user = gi.users.get_users(f_name=self.username)[0]
         if user['email'] == self.email:
+            gi.users.delete_user(user['id'])
             gi.users.delete_user(user['id'], purge=True)
 
     @tenacity.retry(
