@@ -144,6 +144,12 @@ class PagePerfTimer(object):
                 (By.XPATH, "//input[@placeholder='search tools']")
             )
         )
+        # Wait for tool panel to load
+        self.wait.until(
+            expected_conditions.presence_of_element_located(
+                (By.XPATH, "//div[@class='tool-panel-section']//a[@class='title-link' and contains(., 'Get Data')]")
+            )
+        )
 
     @clock_action("tool_search_load")
     def search_for_tool(self):
