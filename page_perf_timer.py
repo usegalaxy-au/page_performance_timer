@@ -90,6 +90,7 @@ class PagePerfTimer(object):
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--disable-gpu")
         self.driver = webdriver.Chrome(options=chrome_options)
+        # self.driver = webdriver.Firefox()
         self.driver.implicitly_wait(180)
         self.wait = WebDriverWait(self.driver, 180)
 
@@ -187,6 +188,7 @@ class PagePerfTimer(object):
     def load_shared_histories(self):
         # Request history page
         self.driver.get(f"{self.server}/histories/list_shared")
+
         # Wait for history page to load
         self.wait.until(
             expected_conditions.presence_of_element_located(
@@ -203,23 +205,38 @@ class PagePerfTimer(object):
         )
         import_history_btn.click()
 
-        # Invoke copy history dialogue
-        copy_history_menu_item = self.driver.find_element(
+        # View history details
+        view_history_menu_item = self.driver.find_element(
             By.XPATH,
-            f"//div[@id='{import_history_btn.get_attribute('id')}-menu']//a[contains(., 'Copy')]",
+            f"//div[@id='{import_history_btn.get_attribute('id')}-menu']//a[contains(., 'View')]",
         )
-        copy_history_menu_item.click()
+        view_history_menu_item.click()
+        self.wait.until(
+            expected_conditions.presence_of_element_located(
+                (By.XPATH, f"//h3[contains(., '{self.workflow_name.lower()}_input_data')]")
+            )
+        )
+        # Invoke copy history dialogue
+        import_history_btn = self.driver.find_element(
+            By.XPATH,
+            f"//button[@title='Import this history' and contains(., 'Import this history')]",
+        )
+        import_history_btn.click()
+
         # Set new history name
         history_name_box = self.driver.find_element(By.ID, "copy-modal-title")
         history_name_box.clear()
         history_name_box.send_keys(f"{self.workflow_name}_Input_data_{self.run_id}")
-        self.driver.find_element(By.ID, "button-1").click()
+        self.driver.find_element(
+            By.XPATH,
+            f"//button[contains(., 'Copy History')]",
+        ).click()
         # Wait for history panel to load with new history
         self.wait.until(
             expected_conditions.presence_of_element_located(
                 (
                     By.XPATH,
-                    f"//div[@id='current-history-panel']//div[contains(., '{self.workflow_name}_Input_data')]",
+                    f"//div[@id='current-history-panel']//h3[contains(., '{self.workflow_name}_Input_data')]",
                 )
             )
         )
