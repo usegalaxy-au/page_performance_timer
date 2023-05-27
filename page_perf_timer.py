@@ -285,7 +285,7 @@ class PagePerfTimer(object):
             # Select relevant choice
             input_1_select = self.driver.find_element(
                 By.XPATH,
-                "//div[@step-label='Forward Reads']//a[@class='select2-choice']",
+                "//div[@data-label='Forward Reads']//a[@class='select2-choice']",
             )
             input_1_select.click()
             # Select relevant choice
@@ -298,7 +298,7 @@ class PagePerfTimer(object):
         elif self.workflow_name == "Selenium_test_4":
             input_select = self.driver.find_element(
                 By.XPATH,
-                "//div[@step-label='ARTIC primers to amplicon assignments']//a[@class='select2-choice']",
+                "//div[@data-label='ARTIC primers to amplicon assignments']//a[@class='select2-choice']",
             )
             input_select.click()
             # Select relevant choice
