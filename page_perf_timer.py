@@ -84,12 +84,12 @@ class PagePerfTimer(object):
         self.timings = {}
 
         """Start web driver"""
-        chrome_options = webdriver.ChromeOptions()
+        options = webdriver.FirefoxOptions()
         if os.environ.get("SELENIUM_HEADLESS"):
-            chrome_options.add_argument("--no-sandbox")
-            chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--disable-gpu")
-        self.driver = webdriver.Chrome(options=chrome_options)
+            options.add_argument("--no-sandbox")
+            options.add_argument("--headless")
+            options.add_argument("--disable-gpu")
+        self.driver = webdriver.Firefox(options=options)
         # self.driver = webdriver.Firefox()
         self.driver.implicitly_wait(180)
         self.wait = WebDriverWait(self.driver, 180)
