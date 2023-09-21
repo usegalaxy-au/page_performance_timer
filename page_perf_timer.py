@@ -236,7 +236,7 @@ class PagePerfTimer(object):
             expected_conditions.presence_of_element_located(
                 (
                     By.XPATH,
-                    f"//div[@id='current-history-panel']//h3[contains(., '{self.workflow_name}_Input_data')]",
+                    f"//div[@id='current-history-panel']//h3[contains(., '{self.workflow_name}_Input_data_{self.run_id}')]",
                 )
             )
         )
