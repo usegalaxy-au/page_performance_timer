@@ -38,7 +38,6 @@ class EndStepReached(Exception):
     """
     Raised when a specific action step has been reached
     """
-
     pass
 
 
@@ -241,7 +240,7 @@ class PagePerfTimer(object):
             )
         )
 
-    @clock_action("workflow_list_page")
+    @clock_action("workflow_list_page_load")
     def load_workflow_list(self):
         # Request workflows list page
         self.driver.get(f"{self.server}/workflows/list")
@@ -250,7 +249,7 @@ class PagePerfTimer(object):
             expected_conditions.presence_of_element_located((By.ID, "workflow-import"))
         )
 
-    @clock_action("workflow_run_page")
+    @clock_action("workflow_run_page_load")
     def load_workflow_run_form(self):
         # Select relevant workflow
         run_workflow_btn = self.driver.find_element(
