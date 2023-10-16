@@ -117,6 +117,13 @@ class PagePerfTimer(object):
         else:
             return False
 
+    def wait_for_history_panel_to_load(self):
+        self.wait.until(
+            expected_conditions.presence_of_element_located(
+                (By.XPATH, "//div/nav/h2[contains(., 'History')]")
+            )
+        )
+
     @clock_action("login_page_load")
     def load_galaxy_login(self):
         # Open Galaxy window
@@ -194,6 +201,7 @@ class PagePerfTimer(object):
                 (By.XPATH, "//h2[contains(., 'Histories shared with you by others')]")
             )
         )
+        self.wait_for_history_panel_to_load()
 
     @clock_action("import_shared_history")
     def import_shared_history(self):
@@ -203,6 +211,7 @@ class PagePerfTimer(object):
             f"//tbody[@id='grid-table-body']//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{self.workflow_name.lower()}_input_data')]",
         )
         import_history_btn.click()
+        self.wait_for_history_panel_to_load()
 
         # View history details
         view_history_menu_item = self.driver.find_element(
@@ -318,7 +327,7 @@ class PagePerfTimer(object):
                 expected_conditions.presence_of_element_located(
                     (
                         By.XPATH,
-                        "//div[@id='center']//a[@class='invocation-report-link' and contains(., 'View Report')]",
+                        "//div[@id='center']//a[contains(@class, 'invocation-report-link') and contains(., 'View Report')]",
                     )
                 )
             )
