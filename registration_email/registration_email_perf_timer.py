@@ -146,14 +146,16 @@ class RegistrationEmailVerifier(object):
     def delete_test_account(self):
         gi = galaxy.GalaxyInstance(url=self.server, key=self.api_key)
         user = gi.users.get_users(f_name=self.username)[0]
-        if user['email'] == self.email:
-            gi.users.delete_user(user['id'])
-            gi.users.delete_user(user['id'], purge=True)
+        if user["email"] == self.email:
+            gi.users.delete_user(user["id"])
+            gi.users.delete_user(user["id"], purge=True)
 
     @tenacity.retry(
         retry=tenacity.retry_if_result(lambda result: not result),
         wait=tenacity.wait_fixed(int(os.environ.get("IMAP_POLL_SECONDS", 10))),
-        stop=tenacity.stop_after_attempt(int(os.environ.get("IMAP_MAX_POLL_ATTEMPTS", 12))),
+        stop=tenacity.stop_after_attempt(
+            int(os.environ.get("IMAP_MAX_POLL_ATTEMPTS", 12))
+        ),
         retry_error_callback=(lambda _: False),
     )
     def verify_email_received(self):
