@@ -5,15 +5,18 @@ FROM ubuntu:22.04 AS selenium
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
   python3 python3-pip \
+  # firefox needs the following installed on 22.04
+  libgtk-3-common libasound2 libdbus-glib-1-2 \
   firefox \
   xvfb \
   && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install --no-cache-dir selenium tenacity
+RUN pip3 install --no-cache-dir selenium
 
 FROM selenium
 
 ENV SELENIUM_HEADLESS=true
+ARG DEBIAN_FRONTEND=noninteractive
 
 ADD page_perf_timer.py /opt/page_timer/
 
