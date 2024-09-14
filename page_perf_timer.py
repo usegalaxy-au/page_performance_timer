@@ -238,7 +238,7 @@ class PagePerfTimer(object):
             expected_conditions.presence_of_element_located(
                 (
                     By.XPATH,
-                    f"//h3[contains(., '{self.workflow_name.lower()}_input_data')]",
+                    f"//h3[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '{self.workflow_name.lower()}_input_data')]",
                 )
             )
         )
@@ -342,28 +342,28 @@ class PagePerfTimer(object):
             # Select relevant choice
             input_1_select = self.driver.find_element(
                 By.XPATH,
-                "//div[@data-label='Forward Reads']//a[@class='select2-choice']",
+                "//div[@class='ui-form-composite']//input/following-sibling::span[contains(., 'ERR019289_2.fastq.gz')][1]",
             )
             input_1_select.click()
             # Select relevant choice
             input_1_select = self.driver.find_element(
                 By.XPATH,
-                "//div[@id='select2-drop']//ul/li/div[contains(., 'ERR019289_1.fastq.gz')]",
+                "//div[@class='ui-form-composite']//ul[@role='listbox']//li[@role='option']//span[contains(., 'ERR019289_1.fastq.gz')]",
             )
             input_1_select.click()
             workflow_wait = 14400
         elif self.workflow_name == "Selenium_test_4":
-            input_select = self.driver.find_element(
+            input_1_select = self.driver.find_element(
                 By.XPATH,
-                "//div[@data-label='ARTIC primers to amplicon assignments']//a[@class='select2-choice']",
+                "//div[@class='ui-form-composite']//div[@data-label='ARTIC primers to amplicon assignments']//input/following-sibling::span[contains(., 'NC_045512.2.fna.fasta')][1]",
             )
-            input_select.click()
+            input_1_select.click()
             # Select relevant choice
-            input_select = self.driver.find_element(
+            input_1_select = self.driver.find_element(
                 By.XPATH,
-                "//div[@id='select2-drop']//ul/li/div[contains(., 'ARTIC_SARS_CoV-2_amplicon_info_v3.tsv')]",
+                "//div[@class='ui-form-composite']//div[@data-label='ARTIC primers to amplicon assignments']//ul[@role='listbox']//li[@role='option']//span[contains(., 'ARTIC_SARS_CoV-2_amplicon_info_v3.tsv')]",
             )
-            input_select.click()
+            input_1_select.click()
             workflow_wait = 14400
         else:
             raise Exception(f"Workflow name not in known list: {self.workflow_name}")
