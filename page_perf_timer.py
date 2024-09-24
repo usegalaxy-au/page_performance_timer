@@ -131,7 +131,7 @@ class PagePerfTimer(object):
     @clock_action("login_page_load")
     def load_galaxy_login(self):
         # Open Galaxy window
-        self.driver.get(f"{self.server}/login")
+        self.driver.get(f"{self.server}login")
         # Wait for username entry to appear
         self.wait.until(self.is_able_to_login)
 
@@ -238,7 +238,7 @@ class PagePerfTimer(object):
     @clock_action("published_histories_page_load")
     def load_published_histories(self):
         # Request history page
-        self.driver.get(f"{self.server}/histories/list_published")
+        self.driver.get(f"{self.server}histories/list_published")
 
         # Wait for history page to load
         self.wait.until(
@@ -310,7 +310,7 @@ class PagePerfTimer(object):
         )
 
         # Request history page
-        self.driver.get(f"{self.server}/histories/list")
+        self.driver.get(f"{self.server}histories/list")
 
         # Wait for history panel to load with new history
         self.wait.until(
@@ -325,7 +325,7 @@ class PagePerfTimer(object):
     @clock_action("workflow_list_page_load")
     def load_workflow_list(self):
         # Request workflows list page
-        self.driver.get(f"{self.server}/workflows/list_shared_with_me")
+        self.driver.get(f"{self.server}workflows/list_shared_with_me")
         # Wait for workflow page to load and import button to appear
         self.wait.until(
             expected_conditions.presence_of_element_located(
