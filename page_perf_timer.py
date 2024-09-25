@@ -325,7 +325,7 @@ class PagePerfTimer(object):
     @clock_action("workflow_list_page_load")
     def load_workflow_list(self):
         # Request workflows list page
-        self.driver.get(f"{self.server}workflows/list_shared_with_me")
+        self.driver.get(f"{self.server}workflows/list_published")
         # Wait for workflow page to load and import button to appear
         self.wait.until(
             expected_conditions.presence_of_element_located(
@@ -413,25 +413,12 @@ class PagePerfTimer(object):
         self.driver.find_element(By.ID, "run-workflow").click()
 
         # wait for the running message to appear
-        self.wait.until(
-            expected_conditions.presence_of_element_located(
-                (
-                    By.XPATH,
-                    f"//div[@id='center']//div[@role='tabpanel']//div[@role='alert']//span[@data-description='loading message' and contains(., 'Waiting to complete invocation')]",
-                )
-            )
-        )
+        loading_xpath = "//div[@id='center']//div[@role='tabpanel']//div[@role='alert']//span[@data-description='loading message' and contains(., 'Waiting to complete invocation')]"
+        self.wait.until(expected_conditions.presence_of_element_located((By.XPATH, loading_xpath)))
 
         # Wait for running message to disappear
-        with SeleniumCustomWait(self.driver, workflow_wait):
-            self.wait.until(
-                expected_conditions.invisibility_of_element_located(
-                    (
-                        By.XPATH,
-                        f"//div[@id='center']//div[@role='tabpanel']//div[@role='alert']//span[@data-description='loading message' and contains(., 'Waiting to complete invocation')]",
-                    )
-                )
-            )
+        custom_wait = WebDriverWait(self.driver, workflow_wait)
+        custom_wait.until(expected_conditions.invisibility_of_element_located((By.XPATH, loading_xpath)))
 
     def run_test_sequence(self):
         self.load_galaxy_login()
