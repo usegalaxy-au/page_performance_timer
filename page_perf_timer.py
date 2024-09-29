@@ -197,7 +197,9 @@ class PagePerfTimer(object):
         open_download_link.click()
         with SeleniumCustomWait(self.driver, 1200):
             download_link = self.driver.find_element(By.XPATH, "//div[@data-index='0']//div[@data-state='ok' and contains(., 'Selenium_test_1_Input_data')]//a[@title='Download']")
-        r = requests.get(download_link.get_attribute("href"), stream=True)
+        all_cookies=self.driver.get_cookies()
+        cookies_dict = {cookie["name"]: cookie["value"] for cookie in all_cookies}
+        r = requests.get(download_link.get_attribute("href"), stream=True, cookies=cookies_dict)
         sig = hashlib.md5()
         for line in r.iter_lines():
             sig.update(line)
