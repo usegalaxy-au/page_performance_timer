@@ -193,10 +193,10 @@ class PagePerfTimer(object):
 
     @clock_action("dummy_file_download")
     def download_dummy_file(self):
-        open_download_link = self.driver.find_element(By.XPATH, "//div[@data-index='0']//div[@data-state='running' and contains(., 'Selenium_test_1_Input_data')]")
+        open_download_link = self.driver.find_element(By.XPATH, "//div[@data-index]//div[@data-state='ok' and contains(., 'Selenium_test_1_Input_data.rocrate')]")
         open_download_link.click()
         with SeleniumCustomWait(self.driver, 1200):
-            download_link = self.driver.find_element(By.XPATH, "//div[@data-index='0']//div[@data-state='ok' and contains(., 'Selenium_test_1_Input_data')]//a[@title='Download']")
+            download_link = self.driver.find_element(By.XPATH, "//div[@data-index]//div[@data-state='ok' and contains(., 'Selenium_test_1_Input_data.rocrate')]//a[@title='Download']")
         all_cookies=self.driver.get_cookies()
         cookies_dict = {cookie["name"]: cookie["value"] for cookie in all_cookies}
         r = requests.get(download_link.get_attribute("href"), stream=True, cookies=cookies_dict)
@@ -429,10 +429,10 @@ class PagePerfTimer(object):
         self.load_tool_form()
         self.load_published_histories()
         self.import_published_history()
+        self.upload_dummy_file()
         self.load_workflow_list()
         self.load_workflow_run_form()
         self.run_workflow()
-        self.upload_dummy_file()
         self.download_dummy_file()
 
     def measure_timings(self):
