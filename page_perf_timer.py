@@ -76,14 +76,15 @@ def clock_action(action_name):
 
 class PagePerfTimer(object):
     def __init__(
-        self, server, username, password, end_step=None, run_id=None, workflow_name=None
+        self, server, username, password, end_step=None, run_id=None, workflow_name=None, category=None,
     ):
         self.run_id = run_id or uuid.uuid4()
-        self.server = server
+        self.server = server.rstrip("/")
         self.username = username
         self.password = password
         self.end_step = end_step
         self.workflow_name = workflow_name
+        self.category = category
         self.timings = {}
 
         """Start web driver"""
@@ -131,7 +132,7 @@ class PagePerfTimer(object):
     @clock_action("login_page_load")
     def load_galaxy_login(self):
         # Open Galaxy window
-        self.driver.get(f"{self.server}login")
+        self.driver.get(f"{self.server}/login")
         # Wait for username entry to appear
         self.wait.until(self.is_able_to_login)
 
@@ -240,7 +241,7 @@ class PagePerfTimer(object):
     @clock_action("published_histories_page_load")
     def load_published_histories(self):
         # Request history page
-        self.driver.get(f"{self.server}histories/list_published")
+        self.driver.get(f"{self.server}/histories/list_published")
 
         # Wait for history page to load
         self.wait.until(
@@ -312,7 +313,7 @@ class PagePerfTimer(object):
         )
 
         # Request history page
-        self.driver.get(f"{self.server}histories/list")
+        self.driver.get(f"{self.server}/histories/list")
 
         # Wait for history panel to load with new history
         self.wait.until(
@@ -327,7 +328,7 @@ class PagePerfTimer(object):
     @clock_action("workflow_list_page_load")
     def load_workflow_list(self):
         # Request workflows list page
-        self.driver.get(f"{self.server}workflows/list_published")
+        self.driver.get(f"{self.server}/workflows/list_published")
         # Wait for workflow page to load and import button to appear
         self.wait.until(
             expected_conditions.presence_of_element_located(
@@ -448,7 +449,7 @@ class PagePerfTimer(object):
     def print_timings(self):
         for action, data in self.timings.items():
             print(
-                f"user_flow_performance,server={self.server},action={action},run_id={self.run_id},end_step={self.end_step},workflow_name={self.workflow_name} time_taken={data.get('elapsed')} {data.get('timestamp')}"
+                f"user_flow_performance,server={self.server},action={action},run_id={self.run_id},end_step={self.end_step},workflow_name={self.workflow_name},category={self.category} time_taken={data.get('elapsed')} {data.get('timestamp')}"
             )
 
 
@@ -493,6 +494,11 @@ def create_parser():
         default="Selenium_test_1",
         help="The name of the workflow to run. Must be Selenium_test_1 through 4",
     )
+    parser.add_argument(
+        "--category",
+        default="default",
+        help="A category for this run. Defaults to the string 'default'.",
+    )
     return parser
 
 
@@ -507,6 +513,7 @@ def main():
         args.end_step,
         args.run_id,
         args.workflow_name,
+        args.category,
     )
     perf_timer.measure_timings()
     perf_timer.print_timings()
