@@ -168,6 +168,9 @@ class PagePerfTimer(object):
 
     @clock_action("dummy_file_upload")
     def upload_dummy_file(self):
+        self.upload_file("https://s3.amazonaws.com/1000genomes/phase3/data/HG01105/alignment/HG01105.mapped.ILLUMINA.bwa.PUR.low_coverage.20130415.bam")
+
+    def upload_file(self, url):
         upload_activity = self.driver.find_element(By.ID, "activity-upload")
         upload_activity.click()
         # paste/fetch data
@@ -175,7 +178,7 @@ class PagePerfTimer(object):
         paste_button.click()
         # paste/fetch data
         upload_row = self.driver.find_element(By.XPATH, "//div[@id='upload-row-0']//textarea")
-        upload_row.send_keys("https://zenodo.org/records/13711466/files/(Galaxy%20History)%20Selenium_test_1_Input_data.rocrate.zip?download=1")
+        upload_row.send_keys(url)
         # start
         start_button = self.driver.find_element(By.ID, "btn-start")
         start_button.click()
@@ -183,28 +186,39 @@ class PagePerfTimer(object):
         close_button = self.driver.find_element(By.ID, "btn-close")
         close_button.click()
         # wait for history item to appear
+        filename = url.rsplit("/", 1)[-1]
         self.wait.until(
             expected_conditions.presence_of_element_located(
                 (
                     By.XPATH,
-                    "//div[@data-index='0']//div[@data-state='running' and contains(., 'Selenium_test_1_Input_data')]",
+                    f"//div[@data-index='0']//div[@data-state='running' and contains(., '{filename}')]",
+                )
+            )
+        )
+        # wait for item to complete
+        custom_wait = WebDriverWait(self.driver, 14400)
+        custom_wait.until(
+            expected_conditions.presence_of_element_located(
+                (
+                    By.XPATH,
+                    f"//div[@data-index='0']//div[@data-state='ok' and contains(., '{filename}')]",
                 )
             )
         )
 
     @clock_action("dummy_file_download")
     def download_dummy_file(self):
-        open_download_link = self.driver.find_element(By.XPATH, "//div[@data-index]//div[@data-state='ok' and contains(., 'Selenium_test_1_Input_data.rocrate')]")
+        open_download_link = self.driver.find_element(By.XPATH, "//div[@data-index]//div[@data-state='ok' and contains(., 'HG01105.mapped')]")
         open_download_link.click()
         with SeleniumCustomWait(self.driver, 1200):
-            download_link = self.driver.find_element(By.XPATH, "//div[@data-index]//div[@data-state='ok' and contains(., 'Selenium_test_1_Input_data.rocrate')]//a[@title='Download']")
+            download_link = self.driver.find_element(By.XPATH, "//div[@data-index]//div[@data-state='ok' and contains(., 'HG01105.mapped')]//a[@title='Download']")
         all_cookies=self.driver.get_cookies()
         cookies_dict = {cookie["name"]: cookie["value"] for cookie in all_cookies}
         r = requests.get(download_link.get_attribute("href"), stream=True, cookies=cookies_dict)
         sig = hashlib.md5()
         for line in r.iter_lines():
             sig.update(line)
-        assert sig.hexdigest() == "a62aaaefa04bdc7acd3b29a127bba3e6"
+        assert sig.hexdigest() == "70342cc5de40f0ebe6a182373b139e27"
 
     @clock_action("tool_search_load")
     def search_for_tool(self):
