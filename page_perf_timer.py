@@ -168,7 +168,7 @@ class PagePerfTimer(object):
 
     @clock_action("dummy_file_upload")
     def upload_dummy_file(self):
-        self.upload_file("https://s3.amazonaws.com/1000genomes/phase3/data/HG01105/alignment/HG01105.mapped.ILLUMINA.bwa.PUR.low_coverage.20130415.bam")
+        self.upload_file("https://s3.amazonaws.com/1000genomes/phase1/technical/other_exome_alignments/NA19473/exome_alignment/NA19473.mapped.ILLUMINA.BWA.LWK.exome.20110521.bam")
 
     def upload_file(self, url):
         upload_activity = self.driver.find_element(By.ID, "activity-upload")
@@ -218,7 +218,7 @@ class PagePerfTimer(object):
         sig = hashlib.md5()
         for line in r.iter_lines():
             sig.update(line)
-        assert sig.hexdigest() == "70342cc5de40f0ebe6a182373b139e27"
+        assert sig.hexdigest() == "52b7ee93e4789a879f862bf434eb0a87"
 
     @clock_action("tool_search_load")
     def search_for_tool(self):
