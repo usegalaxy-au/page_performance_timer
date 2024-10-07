@@ -211,7 +211,7 @@ class PagePerfTimer(object):
         open_download_link = self.driver.find_element(By.XPATH, "//div[@data-index]//div[@data-state='ok' and contains(., 'NA19473.mapped')]")
         open_download_link.click()
         with SeleniumCustomWait(self.driver, 1200):
-            download_link = self.driver.find_element(By.XPATH, "//div[@data-index]//div[@data-state='ok' and contains(., 'NA19473.mapped')]//*[self::a or self::div][@title='Download']")
+            download_link = self.driver.find_element(By.XPATH, "//div[@data-index]//div[@data-state='ok' and contains(., 'NA19473.mapped')]//a[@title='Download'] | //div[@data-index]//div[@data-state='ok' and contains(., 'NA19473.mapped')]//div[@title='Download']//a[contains(text(), 'Download Dataset')]")
         all_cookies=self.driver.get_cookies()
         cookies_dict = {cookie["name"]: cookie["value"] for cookie in all_cookies}
         r = requests.get(download_link.get_attribute("href"), stream=True, cookies=cookies_dict)
