@@ -168,7 +168,7 @@ class PagePerfTimer(object):
 
     @clock_action("dummy_file_upload")
     def upload_dummy_file(self):
-        self.upload_file("phase1/data/HG00553/exome_alignment/HG00553.mapped.illumina.mosaik.PUR.exome.20110411.bam")
+        self.upload_file("https://s3.amazonaws.com/1000genomes/phase1/data/HG00553/exome_alignment/HG00553.mapped.illumina.mosaik.PUR.exome.20110411.bam")
 
     def upload_file(self, url):
         upload_activity = self.driver.find_element(By.ID, "activity-upload")
