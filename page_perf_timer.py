@@ -74,6 +74,44 @@ def clock_action(action_name):
     return wrap
 
 
+def download_and_calculate_md5(url, cookies, max_retries=5):
+    sig = hashlib.md5()
+    bytes_processed = 0
+    headers = {}
+    attempt = 0
+
+    while attempt < max_retries:
+        try:
+            if bytes_processed > 0:
+                # Use Range header to resume download
+                headers['Range'] = f'bytes={bytes_processed}-'
+
+            with requests.get(url, stream=True, headers=headers, cookies=cookies, timeout=120) as response:
+                response.raise_for_status()
+
+                # Check if server supports partial content
+                if response.status_code == 206 or bytes_processed == 0:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        if chunk:
+                            sig.update(chunk)
+                            bytes_processed += len(chunk)
+                    return sig.hexdigest()
+                else:
+                    raise ValueError("Server does not support resuming downloads with 'Range' header.")
+
+        except (Exception) as e:
+            attempt += 1
+            print(f"Attempt {attempt} failed: {e}")
+            if attempt < max_retries:
+                # Exponential backoff before retrying
+                time_to_sleep = 2 ** attempt
+                print(f"Retrying in {time_to_sleep} seconds...")
+                time.sleep(time_to_sleep)
+            else:
+                print("Max retries reached. Download failed.")
+                return None
+
+
 class PagePerfTimer(object):
     def __init__(
         self, server, username, password, end_step=None, run_id=None, workflow_name=None, category=None,
@@ -214,11 +252,9 @@ class PagePerfTimer(object):
             download_link = self.driver.find_element(By.XPATH, "//div[@data-index]//div[@data-state='ok' and contains(., 'HG00553.mapped')]//a[@title='Download'] | //div[@data-index]//div[@data-state='ok' and contains(., 'HG00553.mapped')]//div[@title='Download']//a[contains(text(), 'Download Dataset')]")
         all_cookies=self.driver.get_cookies()
         cookies_dict = {cookie["name"]: cookie["value"] for cookie in all_cookies}
-        r = requests.get(download_link.get_attribute("href"), stream=True, cookies=cookies_dict)
-        sig = hashlib.md5()
-        for line in r.iter_lines():
-            sig.update(line)
-        # assert sig.hexdigest() == "52b7ee93e4789a879f862bf434eb0a87"
+        md5_sum = download_and_calculate_md5(url=download_link.get_attribute("href"), cookies=cookies_dict)
+        print(f"md5sum: {md5_sum}")
+        # assert md5_sum == "52b7ee93e4789a879f862bf434eb0a87"
 
     @clock_action("tool_search_load")
     def search_for_tool(self):
