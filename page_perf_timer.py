@@ -105,10 +105,10 @@ def download_and_calculate_md5(url, cookies, max_retries=5):
             if attempt < max_retries:
                 # Exponential backoff before retrying
                 time_to_sleep = 2 ** attempt
-                print(f"Retrying in {time_to_sleep} seconds...")
+                # print(f"Retrying in {time_to_sleep} seconds...")
                 time.sleep(time_to_sleep)
             else:
-                print("Max retries reached. Download failed.")
+                # print("Max retries reached. Download failed.")
                 return None
 
 
@@ -253,8 +253,7 @@ class PagePerfTimer(object):
         all_cookies=self.driver.get_cookies()
         cookies_dict = {cookie["name"]: cookie["value"] for cookie in all_cookies}
         md5_sum = download_and_calculate_md5(url=download_link.get_attribute("href"), cookies=cookies_dict)
-        print(f"md5sum: {md5_sum}")
-        # assert md5_sum == "52b7ee93e4789a879f862bf434eb0a87"
+        assert md5_sum == "6d178dd0bd8653087c14e150674f8784"
 
     @clock_action("tool_search_load")
     def search_for_tool(self):
@@ -429,7 +428,7 @@ class PagePerfTimer(object):
                 "//div[@class='ui-form-composite']//ul[@role='listbox']//li[@role='option']//span[contains(., 'Subsample of reads from human exome R1')]",
             )
             input_1_select.click()
-            workflow_wait = 14400
+            workflow_wait = 14400 # 4 hours
         elif self.workflow_name == "Selenium_test_2":
             workflow_wait = 14400
         elif self.workflow_name == "Selenium_test_3":
@@ -458,7 +457,7 @@ class PagePerfTimer(object):
                 "//div[@class='ui-form-composite']//div[@data-label='ARTIC primers to amplicon assignments']//ul[@role='listbox']//li[@role='option']//span[contains(., 'ARTIC_SARS_CoV-2_amplicon_info_v3.tsv')]",
             )
             input_1_select.click()
-            workflow_wait = 14400
+            workflow_wait = 18000 # 5 hours
         else:
             raise Exception(f"Workflow name not in known list: {self.workflow_name}")
 
