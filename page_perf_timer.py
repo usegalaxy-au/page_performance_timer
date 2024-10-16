@@ -419,42 +419,64 @@ class PagePerfTimer(object):
             # Select relevant choice
             input_1_select = self.driver.find_element(
                 By.XPATH,
-                "//div[@class='ui-form-composite']//input/following-sibling::span[contains(., 'Subsample of reads from Human exome R2')][1]",
+                "//div[@data-label='1']//input[1]/following-sibling::span[1]",
             )
             input_1_select.click()
             # Select relevant choice
             input_1_select = self.driver.find_element(
                 By.XPATH,
-                "//div[@class='ui-form-composite']//ul[@role='listbox']//li[@role='option']//span[contains(., 'Subsample of reads from human exome R1')]",
+                "//div[@data-label='1']//ul[@role='listbox']//li[@role='option']//span[contains(., 'Subsample of reads from human exome R1')]",
             )
             input_1_select.click()
             workflow_wait = 14400 # 4 hours
         elif self.workflow_name == "Selenium_test_2":
+            # Select relevant choice
+            input_1_select = self.driver.find_element(
+                By.XPATH,
+                "//div[@data-label='1']//input[1]/following-sibling::span[1]",
+            )
+            input_1_select.click()
+            # Select relevant choice
+            input_1_select = self.driver.find_element(
+                By.XPATH,
+                "//div[@data-label='1']//ul[@role='listbox']//li[@role='option']//span[contains(., 'Subsample of reads from human exome R1')]",
+            )
+            input_1_select.click()
             workflow_wait = 14400
         elif self.workflow_name == "Selenium_test_3":
-            # Select relevant choice
+            # Select forward reads
             input_1_select = self.driver.find_element(
                 By.XPATH,
-                "//div[@class='ui-form-composite']//input/following-sibling::span[contains(., 'HG00553.mapped')][1]",
+                "//div[@data-label='Forward Reads']//input[1]/following-sibling::span[1]",
             )
             input_1_select.click()
-            # Select relevant choice
             input_1_select = self.driver.find_element(
                 By.XPATH,
-                "//div[@class='ui-form-composite']//ul[@role='listbox']//li[@role='option']//span[contains(., 'ERR019289_1.fastq.gz')]",
+                "//div[@data-label='Forward Reads']//ul[@role='listbox']//li[@role='option']//span[contains(., 'ERR019289_1.fastq.gz')]",
             )
             input_1_select.click()
+            # Select reverse reads
+            input_2_select = self.driver.find_element(
+                By.XPATH,
+                "//div[@data-label='Reverse Reads']//input[1]/following-sibling::span[1]",
+            )
+            input_2_select.click()
+            input_2_select = self.driver.find_element(
+                By.XPATH,
+                "//div[@data-label='Reverse Reads']//ul[@role='listbox']//li[@role='option']//span[contains(., 'ERR019289_2.fastq.gz')]",
+            )
+            input_2_select.click()
             workflow_wait = 14400
         elif self.workflow_name == "Selenium_test_4":
             input_1_select = self.driver.find_element(
                 By.XPATH,
-                "//div[@class='ui-form-composite']//div[@data-label='ARTIC primers to amplicon assignments']//input/following-sibling::span[contains(., 'NC_045512.2.fna.fasta')][1]",
+                "//div[@data-label='ARTIC primers to amplicon assignments']//input[1]/following-sibling::span[1]",
             )
             input_1_select.click()
             # Select relevant choice
             input_1_select = self.driver.find_element(
                 By.XPATH,
-                "//div[@class='ui-form-composite']//div[@data-label='ARTIC primers to amplicon assignments']//ul[@role='listbox']//li[@role='option']//span[contains(., 'ARTIC_SARS_CoV-2_amplicon_info_v3.tsv')]",
+                "//div[@data-label='ARTIC primers to amplicon assignments']//ul[@role='listbox']//li[@role='option']//span[contains(., 'ARTIC_SARS_CoV-2_amplicon_info_v3.tsv')]",
             )
             input_1_select.click()
             workflow_wait = 18000 # 5 hours
