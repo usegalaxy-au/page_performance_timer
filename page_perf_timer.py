@@ -503,11 +503,13 @@ class PagePerfTimer(object):
         self.load_tool_form()
         self.load_published_histories()
         self.import_published_history()
-        self.upload_dummy_file()
+        if self.workflow_name == "Selenium_test_5":
+            self.upload_dummy_file()
         self.load_workflow_list()
         self.load_workflow_run_form()
         self.run_workflow()
-        self.download_dummy_file()
+        if self.workflow_name == "Selenium_test_5":
+            self.download_dummy_file()
 
     def measure_timings(self):
         self.timings = {}
