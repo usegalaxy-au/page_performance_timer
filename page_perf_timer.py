@@ -467,7 +467,7 @@ class PagePerfTimer(object):
             )
             input_2_select.click()
             workflow_wait = 14400
-        elif self.workflow_name == "Selenium_test_4":
+        elif self.workflow_name == "Selenium_test_4" or self.workflow_name == "Selenium_test_6":
             input_1_select = self.driver.find_element(
                 By.XPATH,
                 "//div[@data-label='ARTIC primers to amplicon assignments']//input[1]/following-sibling::span[1]",
@@ -481,7 +481,7 @@ class PagePerfTimer(object):
             input_1_select.click()
             workflow_wait = 18000 # 5 hours
         elif self.workflow_name == "Selenium_test_5":
-            workflow_wait = 14400 # 5 hours
+            workflow_wait = 14400 # 4 hours
         else:
             raise Exception(f"Workflow name not in known list: {self.workflow_name}")
 
