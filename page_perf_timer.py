@@ -244,16 +244,23 @@ class PagePerfTimer(object):
             )
         )
 
-    @clock_action("dummy_file_download")
-    def download_dummy_file(self):
-        open_download_link = self.driver.find_element(By.XPATH, "//div[@data-index]//div[@data-state='ok' and contains(., 'HG00553.mapped')]")
+    def download_file(self, filename):
+        open_download_link = self.driver.find_element(By.XPATH, f"//div[@data-index]//div[@data-state='ok' and contains(., '{filename}')]")
         open_download_link.click()
         with SeleniumCustomWait(self.driver, 1200):
-            download_link = self.driver.find_element(By.XPATH, "//div[@data-index]//div[@data-state='ok' and contains(., 'HG00553.mapped')]//a[@title='Download'] | //div[@data-index]//div[@data-state='ok' and contains(., 'HG00553.mapped')]//div[@title='Download']//a[contains(text(), 'Download Dataset')]")
-        all_cookies=self.driver.get_cookies()
+            download_link = self.driver.find_element(By.XPATH, f"//div[@data-index]//div[@data-state='ok' and contains(., '{filename}')]//a[@title='Download'] | //div[@data-index]//div[@data-state='ok' and contains(., '{filename}')]//div[@title='Download']//a[contains(text(), 'Download Dataset')]")
+        all_cookies = self.driver.get_cookies()
         cookies_dict = {cookie["name"]: cookie["value"] for cookie in all_cookies}
-        md5_sum = download_and_calculate_md5(url=download_link.get_attribute("href"), cookies=cookies_dict)
+        return download_and_calculate_md5(url=download_link.get_attribute("href"), cookies=cookies_dict)
+
+    @clock_action("dummy_file_download")
+    def download_dummy_file(self):
+        md5_sum = self.download_file("HG00553.mapped")
         assert md5_sum == "6d178dd0bd8653087c14e150674f8784"
+
+    @clock_action("jbrowse_file_download")
+    def download_jbrowse_file(self):
+        self.download_file("JBrowse")
 
     @clock_action("tool_search_load")
     def search_for_tool(self):
@@ -510,6 +517,7 @@ class PagePerfTimer(object):
         self.run_workflow()
         if self.workflow_name == "Selenium_test_5":
             self.download_dummy_file()
+            self.download_jbrowse_file()
 
     def measure_timings(self):
         self.timings = {}
