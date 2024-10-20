@@ -598,8 +598,11 @@ def main():
         args.workflow_name,
         args.category,
     )
-    perf_timer.measure_timings()
-    perf_timer.print_timings()
+    try:
+        perf_timer.measure_timings()
+    finally:
+        # print results so far
+        perf_timer.print_timings()
     return 0
 
 
