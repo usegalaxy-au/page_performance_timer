@@ -488,7 +488,7 @@ class PagePerfTimer(object):
             input_1_select.click()
             workflow_wait = 18000 # 5 hours
         elif self.workflow_name == "Selenium_test_5":
-            workflow_wait = 14400 # 4 hours
+            workflow_wait = 21600 # 6 hours
         else:
             raise Exception(f"Workflow name not in known list: {self.workflow_name}")
 
