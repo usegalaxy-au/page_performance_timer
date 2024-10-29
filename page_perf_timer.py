@@ -487,7 +487,7 @@ class PagePerfTimer(object):
             )
             input_1_select.click()
             workflow_wait = 18000 # 5 hours
-        elif self.workflow_name == "Selenium_test_5":
+        elif self.workflow_name == "Selenium_test_5" or self.workflow_name == "Selenium_test_7":
             workflow_wait = 21600 # 6 hours
         else:
             raise Exception(f"Workflow name not in known list: {self.workflow_name}")
@@ -517,6 +517,7 @@ class PagePerfTimer(object):
         self.run_workflow()
         if self.workflow_name == "Selenium_test_5":
             self.download_dummy_file()
+        if self.workflow_name == "Selenium_test_7":
             self.download_jbrowse_file()
 
     def measure_timings(self):
