@@ -109,7 +109,7 @@ def download_and_calculate_md5(url, cookies, max_retries=5):
                 time.sleep(time_to_sleep)
             else:
                 # print("Max retries reached. Download failed.")
-                return None
+                raise TimeoutError("Max number of attempts exceeded")
 
 
 class PagePerfTimer(object):
