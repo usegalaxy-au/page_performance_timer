@@ -156,7 +156,7 @@ class PagePerfTimer(object):
         with SeleniumCustomWait(self.driver, 0):
             try:
                 return self.driver.find_element(
-                    By.XPATH, "//button[contains(., 'BioCommons Login')]"
+                    By.XPATH, "//button[contains(., 'BioCommons Access')]"
                 )
             except NoSuchElementException:
                 return None
