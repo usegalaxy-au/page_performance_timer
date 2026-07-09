@@ -151,15 +151,6 @@ class PagePerfTimer(object):
             except NoSuchElementException:
                 return None
 
-    def find_sign_in_with_email(self):
-        with SeleniumCustomWait(self.driver, 0):
-            try:
-                return self.driver.find_element(
-                    By.XPATH, "//a[contains(., 'Sign in with email')]"
-                )
-            except NoSuchElementException:
-                return None
-
     def find_galaxy_password_input(self):
         with SeleniumCustomWait(self.driver, 0):
             try:
@@ -173,6 +164,12 @@ class PagePerfTimer(object):
     def find_biocommons_password_input(self):
         return self.find_visible_element("//input[@id='password' or @name='password']")
 
+    def wait_for_login_form(self):
+        self.wait.until(
+            lambda driver: self.find_galaxy_login_input()
+            or self.find_biocommons_login_input()
+        )
+
     def wait_for_history_panel_to_load(self):
         self.wait.until(
             expected_conditions.presence_of_element_located(
@@ -184,6 +181,7 @@ class PagePerfTimer(object):
     def load_galaxy_login(self):
         # Open Galaxy window
         self.driver.get(f"{self.server}/login")
+        self.wait_for_login_form()
 
     def wait_for_galaxy_homepage(self):
         # Wait for tool search box to appear
@@ -212,9 +210,6 @@ class PagePerfTimer(object):
         password_input.send_keys(Keys.ENTER)
 
     def login_with_biocommons_login(self):
-        elem = self.find_sign_in_with_email()
-        if elem:
-            elem.click()
         username_input = self.wait.until(
             lambda driver: self.find_biocommons_login_input()
         )
@@ -229,23 +224,13 @@ class PagePerfTimer(object):
 
     @clock_action("home_page_load")
     def login_to_galaxy_homepage(self):
+        self.wait_for_login_form()
         if self.find_galaxy_login_input():
             self.login_with_galaxy_login()
-        elif self.find_sign_in_with_email() or self.find_biocommons_login_input():
+        elif self.find_biocommons_login_input():
             self.login_with_biocommons_login()
         else:
-            # Let the concrete form selectors decide after the page has had a chance to render.
-            self.wait.until(
-                lambda driver: self.find_galaxy_login_input()
-                or self.find_sign_in_with_email()
-                or self.find_biocommons_login_input()
-            )
-            if self.find_galaxy_login_input():
-                self.login_with_galaxy_login()
-            elif self.find_sign_in_with_email() or self.find_biocommons_login_input():
-                self.login_with_biocommons_login()
-            else:
-                raise RuntimeError("No supported login flow found on the page")
+            raise RuntimeError("No supported login form found on the page")
         self.wait_for_galaxy_homepage()
 
     @clock_action("dummy_file_upload")
