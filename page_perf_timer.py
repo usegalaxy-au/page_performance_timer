@@ -144,7 +144,7 @@ class PagePerfTimer(object):
                     return element
             return None
 
-    def find_login_button(self):
+    def find_galaxy_login_input(self):
         with SeleniumCustomWait(self.driver, 0):
             try:
                 return self.driver.find_element(By.NAME, "login")
@@ -167,18 +167,18 @@ class PagePerfTimer(object):
             except NoSuchElementException:
                 return None
 
-    def find_new_login_input(self):
+    def find_biocommons_login_input(self):
         return self.find_visible_element("//input[@name='username' or @id='username']")
 
-    def find_new_password_input(self):
+    def find_biocommons_password_input(self):
         return self.find_visible_element("//input[@id='password' or @name='password']")
 
     def is_able_to_login(self, driver):
-        if self.find_login_button():
+        if self.find_galaxy_login_input():
             return True
         elif self.find_sign_in_with_email():
             return True
-        elif self.find_new_login_input():
+        elif self.find_biocommons_login_input():
             return True
         else:
             return False
@@ -214,8 +214,8 @@ class PagePerfTimer(object):
             )
         )
 
-    def login_with_galaxy_internal_login(self):
-        username_input = self.wait.until(lambda driver: self.find_login_button())
+    def login_with_galaxy_login(self):
+        username_input = self.wait.until(lambda driver: self.find_galaxy_login_input())
         password_input = self.wait.until(lambda driver: self.find_galaxy_password_input())
         username_input.clear()
         username_input.send_keys(self.username)
@@ -223,12 +223,16 @@ class PagePerfTimer(object):
         password_input.send_keys(self.password)
         password_input.send_keys(Keys.ENTER)
 
-    def login_with_alternate_login(self):
+    def login_with_biocommons_login(self):
         elem = self.find_sign_in_with_email()
         if elem:
             elem.click()
-        username_input = self.wait.until(lambda driver: self.find_new_login_input())
-        password_input = self.wait.until(lambda driver: self.find_new_password_input())
+        username_input = self.wait.until(
+            lambda driver: self.find_biocommons_login_input()
+        )
+        password_input = self.wait.until(
+            lambda driver: self.find_biocommons_password_input()
+        )
         username_input.clear()
         username_input.send_keys(self.username)
         password_input.clear()
@@ -237,10 +241,10 @@ class PagePerfTimer(object):
 
     @clock_action("home_page_load")
     def login_to_galaxy_homepage(self):
-        if self.find_login_button():
-            self.login_with_galaxy_internal_login()
-        elif self.find_sign_in_with_email() or self.find_new_login_input():
-            self.login_with_alternate_login()
+        if self.find_galaxy_login_input():
+            self.login_with_galaxy_login()
+        elif self.find_sign_in_with_email() or self.find_biocommons_login_input():
+            self.login_with_biocommons_login()
         else:
             raise RuntimeError("No supported login flow found on the page")
         self.wait_for_galaxy_homepage()
