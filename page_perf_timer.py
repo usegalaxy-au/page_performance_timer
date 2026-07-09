@@ -161,7 +161,9 @@ class PagePerfTimer(object):
 
     def is_able_to_login(self, driver):
         return bool(
-            self.find_sign_in_with_email() or self.find_galaxy_login_input()
+            self.find_sign_in_with_email()
+            or self.find_galaxy_login_input()
+            or self.find_username_or_email_input()
         )
 
     def wait_for_history_panel_to_load(self):
@@ -223,7 +225,7 @@ class PagePerfTimer(object):
 
     @clock_action("home_page_load")
     def login_to_galaxy_homepage(self):
-        if self.find_sign_in_with_email():
+        if self.find_sign_in_with_email() or self.find_username_or_email_input():
             self.login_with_alternate_login()
         elif self.find_galaxy_login_input():
             self.login_with_galaxy_internal_login()
