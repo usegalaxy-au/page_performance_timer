@@ -160,14 +160,9 @@ class PagePerfTimer(object):
         return self.find_visible_element("//input[@id='password' or @name='password']")
 
     def is_able_to_login(self, driver):
-        if self.find_galaxy_login_input():
-            return True
-        elif self.find_sign_in_with_email():
-            return True
-        elif self.find_username_or_email_input():
-            return True
-        else:
-            return False
+        return bool(
+            self.find_sign_in_with_email() or self.find_galaxy_login_input()
+        )
 
     def wait_for_history_panel_to_load(self):
         self.wait.until(
@@ -228,10 +223,12 @@ class PagePerfTimer(object):
 
     @clock_action("home_page_load")
     def login_to_galaxy_homepage(self):
-        if self.find_sign_in_with_email() or self.find_username_or_email_input():
+        if self.find_sign_in_with_email():
             self.login_with_alternate_login()
-        else:
+        elif self.find_galaxy_login_input():
             self.login_with_galaxy_internal_login()
+        else:
+            raise RuntimeError("No supported login flow found on the page")
         self.wait_for_galaxy_homepage()
 
     @clock_action("dummy_file_upload")
