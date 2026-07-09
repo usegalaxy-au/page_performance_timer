@@ -159,12 +159,24 @@ class PagePerfTimer(object):
     def find_alternate_password_input(self):
         return self.find_visible_element("//input[@id='password' or @name='password']")
 
-    def is_able_to_login(self, driver):
+    def is_old_login_available(self):
+        return bool(self.find_galaxy_login_input())
+
+    def is_new_login_available(self):
         return bool(
             self.find_sign_in_with_email()
-            or self.find_galaxy_login_input()
-            or self.find_username_or_email_input()
+            or (self.find_username_or_email_input() and not self.find_galaxy_login_input())
         )
+
+    def get_login_flow(self):
+        if self.is_old_login_available():
+            return "old"
+        if self.is_new_login_available():
+            return "new"
+        return None
+
+    def is_able_to_login(self, driver):
+        return bool(self.get_login_flow())
 
     def wait_for_history_panel_to_load(self):
         self.wait.until(
@@ -177,7 +189,7 @@ class PagePerfTimer(object):
     def load_galaxy_login(self):
         # Open Galaxy window
         self.driver.get(f"{self.server}/login")
-        # Wait for username entry to appear
+        # Wait for one of the supported login forms to appear.
         self.wait.until(self.is_able_to_login)
 
     def wait_for_galaxy_homepage(self):
@@ -225,9 +237,10 @@ class PagePerfTimer(object):
 
     @clock_action("home_page_load")
     def login_to_galaxy_homepage(self):
-        if self.find_sign_in_with_email() or self.find_username_or_email_input():
+        login_flow = self.get_login_flow()
+        if login_flow == "new":
             self.login_with_alternate_login()
-        elif self.find_galaxy_login_input():
+        elif login_flow == "old":
             self.login_with_galaxy_internal_login()
         else:
             raise RuntimeError("No supported login flow found on the page")
