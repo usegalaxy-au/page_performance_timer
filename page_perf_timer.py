@@ -136,37 +136,35 @@ class PagePerfTimer(object):
         self.driver.implicitly_wait(180)
         self.wait = WebDriverWait(self.driver, 180)
 
-    def find_login_button(self):
+    def find_visible_element(self, xpath):
         with SeleniumCustomWait(self.driver, 0):
-            try:
-                return self.driver.find_element(
-                    By.XPATH, "//input[@name='login' or @name='username' or @id='username']"
-                )
-            except NoSuchElementException:
-                return None
+            elements = self.driver.find_elements(By.XPATH, xpath)
+            for element in elements:
+                if element.is_displayed() and element.is_enabled():
+                    return element
+            return None
+
+    def find_galaxy_login_input(self):
+        return self.find_visible_element("//input[@name='login']")
 
     def find_sign_in_with_email(self):
-        with SeleniumCustomWait(self.driver, 0):
-            try:
-                return self.driver.find_element(
-                    By.XPATH, "//a[contains(., 'Sign in with email')]"
-                )
-            except NoSuchElementException:
-                return None
+        return self.find_visible_element("//a[contains(., 'Sign in with email')]")
 
-    def find_password_input(self):
-        with SeleniumCustomWait(self.driver, 0):
-            try:
-                return self.driver.find_element(
-                    By.XPATH, "//input[@name='password' or @id='password']"
-                )
-            except NoSuchElementException:
-                return None
+    def find_galaxy_password_input(self):
+        return self.find_visible_element("//input[@name='password']")
+
+    def find_username_or_email_input(self):
+        return self.find_visible_element("//input[@name='username' or @id='username']")
+
+    def find_alternate_password_input(self):
+        return self.find_visible_element("//input[@id='password' or @name='password']")
 
     def is_able_to_login(self, driver):
-        if self.find_login_button():
+        if self.find_galaxy_login_input():
             return True
         elif self.find_sign_in_with_email():
+            return True
+        elif self.find_username_or_email_input():
             return True
         else:
             return False
@@ -202,25 +200,38 @@ class PagePerfTimer(object):
             )
         )
 
-    def login_with_username_and_password(self):
-        elem = self.find_sign_in_with_email()
-        # Log in page contains username and password fields from Galaxy or from Biocommmons Access
-        if elem:
-            elem.click()
-        username_input = self.wait.until(lambda driver: self.find_login_button())
-        password_input = self.wait.until(lambda driver: self.find_password_input())
-        # Type in username
+    def login_with_galaxy_internal_login(self):
+        username_input = self.wait.until(lambda driver: self.find_galaxy_login_input())
+        password_input = self.wait.until(lambda driver: self.find_galaxy_password_input())
         username_input.clear()
         username_input.send_keys(self.username)
-        # Type in password
         password_input.clear()
         password_input.send_keys(self.password)
-        # Submit login form
+        password_input.send_keys(Keys.ENTER)
+
+    def login_with_alternate_login(self):
+        elem = self.find_sign_in_with_email()
+        # Some deployments gate the visible form behind an extra email-login link.
+        if elem:
+            elem.click()
+        username_input = self.wait.until(
+            lambda driver: self.find_username_or_email_input()
+        )
+        password_input = self.wait.until(
+            lambda driver: self.find_alternate_password_input()
+        )
+        username_input.clear()
+        username_input.send_keys(self.username)
+        password_input.clear()
+        password_input.send_keys(self.password)
         password_input.send_keys(Keys.ENTER)
 
     @clock_action("home_page_load")
     def login_to_galaxy_homepage(self):
-        self.login_with_username_and_password()
+        if self.find_sign_in_with_email() or self.find_username_or_email_input():
+            self.login_with_alternate_login()
+        else:
+            self.login_with_galaxy_internal_login()
         self.wait_for_galaxy_homepage()
 
     @clock_action("dummy_file_upload")
