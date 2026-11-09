@@ -163,10 +163,21 @@ class PagePerfTimer(object):
             except NoSuchElementException:
                 return None
 
+    def find_biocommons_login_button(self):
+        with SeleniumCustomWait(self.driver, 0):
+            try:
+                return self.driver.find_element(
+                    By.XPATH, "//button[contains(., 'BioCommons Access')]"
+                )
+            except NoSuchElementException:
+                return None
+
     def is_able_to_login(self, driver):
         if self.find_login_button():
             return True
         elif self.find_sign_in_with_email():
+            return True
+        elif self.find_biocommons_login_button():
             return True
         else:
             return False
@@ -203,10 +214,11 @@ class PagePerfTimer(object):
         )
 
     def login_with_username_and_password(self):
-        elem = self.find_sign_in_with_email()
-        # Log in page contains username and password fields from Galaxy or from Biocommmons Access
+        # Some deployments show a BioCommons entry button before the login form.
+        elem = self.find_biocommons_login_button() or self.find_sign_in_with_email()
         if elem:
             elem.click()
+        # Both Galaxy and BioCommons credential forms use this shared flow.
         username_input = self.wait.until(lambda driver: self.find_login_button())
         password_input = self.wait.until(lambda driver: self.find_password_input())
         # Type in username
